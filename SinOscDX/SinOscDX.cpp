@@ -11,8 +11,8 @@ struct SinOscDX : public Unit {
 };
 
 void SinOscDX_next_a(SinOscDX* unit, int inNumSamples) {
-    float *out = ZOUT(0);
-    float *pm = ZIN(1);
+    float *out = OUT(0);
+    float *pm = IN(1);
 
     float *table0 = ft->mSineWavetable;
     float *table1 = table0 + 1;
@@ -21,22 +21,22 @@ void SinOscDX_next_a(SinOscDX* unit, int inNumSamples) {
     int32 phase = unit->m_phase;
 
     float freq = unit->m_freq;
-    float freq_slope = CALCSLOPE(ZIN0(0) * unit->m_cpstoinc, freq);
+    float freq_slope = CALCSLOPE(IN0(0) * unit->m_cpstoinc, freq);
 
     float radtoinc = unit->m_radtoinc;
 
     float fb = unit->m_fb;
-    float fb_slope = CALCSLOPE(ZIN0(2) * unit->m_radtoinc, fb);
+    float fb_slope = CALCSLOPE(IN0(2) * unit->m_radtoinc, fb);
 
     float cur;
     float pre = unit->m_pre;
     float mem = unit->m_mem;
 
-    LooP(inNumSamples) {
-        cur = lookupi1(table0, table1, phase + (int32)(ZXP(pm) * radtoinc + (fb < 0 ? -fb * fabs(mem) : fb * mem)), lomask);
+    for (int i = 0; i < inNumSamples; ++i) {
+        cur = lookupi1(table0, table1, phase + (int32)(pm[i] * radtoinc + (fb < 0 ? -fb * fabs(mem) : fb * mem)), lomask);
         mem = (pre + cur) * 0.5;
         pre = cur;
-        ZXP(out) = mem;
+        out[i] = mem;
         phase += (int32)(freq);
         freq += freq_slope;
         fb += fb_slope;
@@ -49,7 +49,7 @@ void SinOscDX_next_a(SinOscDX* unit, int inNumSamples) {
 }
 
 void SinOscDX_next_k(SinOscDX* unit, int inNumSamples) {
-    float *out = ZOUT(0);
+    float *out = OUT(0);
 
     float *table0 = ft->mSineWavetable;
     float *table1 = table0 + 1;
@@ -58,23 +58,23 @@ void SinOscDX_next_k(SinOscDX* unit, int inNumSamples) {
     int32 phase = unit->m_phase;
 
     float freq = unit->m_freq;
-    float freq_slope = CALCSLOPE(ZIN0(0) * unit->m_cpstoinc, freq);
+    float freq_slope = CALCSLOPE(IN0(0) * unit->m_cpstoinc, freq);
 
     float pm = unit->m_pm;
-    float pm_slope = CALCSLOPE(ZIN0(1) * unit->m_radtoinc, pm);
+    float pm_slope = CALCSLOPE(IN0(1) * unit->m_radtoinc, pm);
 
     float fb = unit->m_fb;
-    float fb_slope = CALCSLOPE(ZIN0(2) * unit->m_radtoinc, fb);
+    float fb_slope = CALCSLOPE(IN0(2) * unit->m_radtoinc, fb);
 
     float cur;
     float pre = unit->m_pre;
     float mem = unit->m_mem;
 
-    LooP(inNumSamples) {
+    for (int i = 0; i < inNumSamples; ++i) {
         cur = lookupi1(table0, table1, phase + (int32)(pm + (fb < 0 ? -fb * fabs(mem) : fb * mem)), lomask);
         mem = (pre + cur) * 0.5;
         pre = cur;
-        ZXP(out) = mem;
+        out[i] = mem;
         phase += (int32)(freq);
         freq += freq_slope;
         pm += pm_slope;
@@ -93,9 +93,9 @@ void SinOscDX_Ctor(SinOscDX* unit) {
     unit->m_cpstoinc = size * SAMPLEDUR * 65536.;
     unit->m_radtoinc = size * rtwopi * 65536.;
     unit->m_lomask = (size - 1) << 3;
-    unit->m_freq = ZIN0(0) * unit->m_cpstoinc;
-    unit->m_pm = ZIN0(1) * unit->m_radtoinc;
-    unit->m_fb = ZIN0(2) * unit->m_radtoinc;
+    unit->m_freq = IN0(0) * unit->m_cpstoinc;
+    unit->m_pm = IN0(1) * unit->m_radtoinc;
+    unit->m_fb = IN0(2) * unit->m_radtoinc;
     unit->m_pre = 0.;
     unit->m_mem = 0.;
 
