@@ -33,7 +33,7 @@ void SinOscDX_next_a(SinOscDX* unit, int inNumSamples) {
     float mem = unit->m_mem;
 
     for (int i = 0; i < inNumSamples; ++i) {
-        cur = lookupi1(table0, table1, phase + (int32)(pm[i] * radtoinc + (fb < 0 ? -fb * fabs(mem) : fb * mem)), lomask);
+        cur = lookupi1(table0, table1, phase + (int32)(pm[i] * radtoinc + (fb < 0 ? fabs(fb * mem) : fb * mem)), lomask);
         mem = (pre + cur) * 0.5;
         pre = cur;
         out[i] = mem;
@@ -71,7 +71,7 @@ void SinOscDX_next_k(SinOscDX* unit, int inNumSamples) {
     float mem = unit->m_mem;
 
     for (int i = 0; i < inNumSamples; ++i) {
-        cur = lookupi1(table0, table1, phase + (int32)(pm + (fb < 0 ? -fb * fabs(mem) : fb * mem)), lomask);
+        cur = lookupi1(table0, table1, phase + (int32)(pm + (fb < 0 ? fabs(fb * mem) : fb * mem)), lomask);
         mem = (pre + cur) * 0.5;
         pre = cur;
         out[i] = mem;
